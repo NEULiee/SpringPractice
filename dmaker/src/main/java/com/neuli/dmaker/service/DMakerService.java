@@ -13,7 +13,7 @@ import javax.transaction.Transactional;
 @RequiredArgsConstructor
 public class DMakerService {
 
-    // @RequiredArgsConstructor
+    // @RequiredArgsConstructor 필요
     private final DeveloperRepository developerRepository;
 
     // @Autowired, @Inject 문제점

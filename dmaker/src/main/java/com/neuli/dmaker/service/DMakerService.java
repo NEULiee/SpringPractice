@@ -3,6 +3,7 @@ package com.neuli.dmaker.service;
 import com.neuli.dmaker.dto.CreateDeveloper;
 import com.neuli.dmaker.dto.DeveloperDetailDto;
 import com.neuli.dmaker.dto.DeveloperDto;
+import com.neuli.dmaker.dto.EditDeveloper;
 import com.neuli.dmaker.entity.Developer;
 import com.neuli.dmaker.exception.DMakerException;
 import com.neuli.dmaker.repository.DeveloperRepository;
@@ -63,20 +64,7 @@ public class DMakerService {
         // business validation
 
         /* control + alt + v : 동일한 변수 뽑아내기 */
-        DeveloperLevel developerLevel = request.getDeveloperLevel();
-        Integer experienceYears = request.getExperienceYears();
-
-        if (developerLevel == DeveloperLevel.SENIOR
-                && experienceYears < 10) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-        if (developerLevel == DeveloperLevel.JUNGNIOR
-                && (experienceYears < 4 || experienceYears > 10)) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-        if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
+        validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
 
         developerRepository.findByMemberId(request.getMemberId())
                 .ifPresent((developer -> {
@@ -103,5 +91,42 @@ public class DMakerService {
         return developerRepository.findByMemberId(memberId)
                 .map(DeveloperDetailDto::fromEntity)
                 .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
+    }
+
+    // 메서드를 들어가기 전에 트랜젝션을 시작했다가 값을 바꿔준 후
+    // 전체 체킹을 하여 변경되는 부분이 커밋이 되도록 @Transactional
+    @Transactional
+    public DeveloperDetailDto editDeveloperDetail(String memberId, EditDeveloper.Request request) {
+        validateEditDeveloperRequest(request, memberId);
+
+        Developer developer = developerRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
+
+        developer.setDeveloperLevel(request.getDeveloperLevel());
+        developer.setDeveloperSkillType(request.getDeveloperSkillType());
+        developer.setExperienceYears(request.getExperienceYears());
+
+        return DeveloperDetailDto.fromEntity(developer);
+    }
+
+    private void validateEditDeveloperRequest(EditDeveloper.Request request, String memberId) {
+        // business validation
+
+        /* control + alt + v : 동일한 변수 뽑아내기 */
+        validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
+    }
+
+    private void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
+        if (developerLevel == DeveloperLevel.SENIOR
+                && experienceYears < 10) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+        if (developerLevel == DeveloperLevel.JUNGNIOR
+                && (experienceYears < 4 || experienceYears > 10)) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+        if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
     }
 }

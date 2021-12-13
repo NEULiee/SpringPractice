@@ -3,6 +3,7 @@ package com.neuli.dmaker.controller;
 import com.neuli.dmaker.dto.CreateDeveloper;
 import com.neuli.dmaker.dto.DeveloperDetailDto;
 import com.neuli.dmaker.dto.DeveloperDto;
+import com.neuli.dmaker.dto.EditDeveloper;
 import com.neuli.dmaker.service.DMakerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,5 +37,14 @@ public class DMakerController {
     public CreateDeveloper.Response createDevelopers(@Valid @RequestBody CreateDeveloper.Request request) {
         log.info("request : {}", request);
         return dMakerService.createDeveloper(request);
+    }
+
+    // @PutMapping 은 전부 수정, @PatchMapping 은 일부 수정
+    @PutMapping("/developer/{memberId}")
+    public DeveloperDetailDto editDeveloperByMemberId(
+            @PathVariable String memberId,
+            @Valid @RequestBody EditDeveloper.Request request) {
+        log.info("PUT /developer/{memberId} HTTP/1.1");
+        return dMakerService.editDeveloperDetail(memberId, request);
     }
 }

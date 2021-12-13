@@ -22,6 +22,18 @@ public class DMakerService {
     // 생성자를 생성하는 것이 만들어졌다.
     // 하지만 생성자도 불편함이 있어 final 을 사용
 
+    /**
+     *  Transaction
+     *  데이터베이스의 상태를 변화시키기 해서 수행하는 작업의 단위
+     *
+     *  Transaction 의 특징
+     *  [ACID]
+     *  Atomic 원자성
+     *  Consistency 일관성 : 항상 정해진 규칙에 의해서 DB 에 저장되어 있어야 한다.
+     *  Isolation 고립성
+     *  Durability 지속성 : commit 이 된 시점의 이력을 모두 남겨야한다.
+     */
+
     @Transactional
     public void createDeveloper() {
         Developer developer = Developer.builder()

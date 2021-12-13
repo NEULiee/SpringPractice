@@ -1,5 +1,6 @@
 package com.neuli.dmaker.dto;
 
+import com.neuli.dmaker.entity.Developer;
 import com.neuli.dmaker.type.DeveloperLevel;
 import com.neuli.dmaker.type.DeveloperSkillType;
 import lombok.*;
@@ -49,5 +50,14 @@ public class CreateDeveloper {
         private Integer experienceYears;
         private String memberId;
 
+        // Developer -> CreateDeveloper.Response
+        public static Response fromEntity(Developer developer) {
+            return Response.builder()
+                    .developerLevel(developer.getDeveloperLevel())
+                    .developerSkillType(developer.getDeveloperSkillType())
+                    .experienceYears(developer.getExperienceYears())
+                    .memberId(developer.getMemberId())
+                    .build();
+        }
     }
 }

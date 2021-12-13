@@ -25,6 +25,7 @@ public class DMakerService {
     /**
      *  Transaction
      *  데이터베이스의 상태를 변화시키기 해서 수행하는 작업의 단위
+     *  예를들어, 게시글을 작성하는 작업 -> 게시글 작성 insert, 게시글 불러오기 select 작업들을 하나의 트랜잭션으로 본다.
      *
      *  Transaction 의 특징
      *  [ACID]

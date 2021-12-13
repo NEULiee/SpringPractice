@@ -1,18 +1,20 @@
 package com.neuli.dmaker.service;
 
 import com.neuli.dmaker.dto.CreateDeveloper;
+import com.neuli.dmaker.dto.DeveloperDetailDto;
+import com.neuli.dmaker.dto.DeveloperDto;
 import com.neuli.dmaker.entity.Developer;
 import com.neuli.dmaker.exception.DMakerException;
 import com.neuli.dmaker.repository.DeveloperRepository;
 import com.neuli.dmaker.type.DeveloperLevel;
-import com.neuli.dmaker.type.DeveloperSkillType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static com.neuli.dmaker.exception.DMakerErrorCode.DUPLICATED_MEMBER_ID;
-import static com.neuli.dmaker.exception.DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED;
+import static com.neuli.dmaker.exception.DMakerErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -82,4 +84,24 @@ public class DMakerService {
                 }));
     }
 
+    public List<DeveloperDto> getAllDevelopers() {
+        /**
+         *  collect()
+         *  1) 스트림의 아이템들을 List 또는 Set 자료형으로 변환
+         *  2) joining
+         *  3) Sorting 하여 가장 큰 객체 리턴
+         *  4) 평균값을 리턴
+         *  등등
+         */
+
+        return developerRepository.findAll()
+                .stream().map(DeveloperDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public DeveloperDetailDto getDeveloperDetail(String memberId) {
+        return developerRepository.findByMemberId(memberId)
+                .map(DeveloperDetailDto::fromEntity)
+                .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
+    }
 }

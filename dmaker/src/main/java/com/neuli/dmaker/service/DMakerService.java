@@ -1,5 +1,6 @@
 package com.neuli.dmaker.service;
 
+import com.neuli.dmaker.dto.CreateDeveloper;
 import com.neuli.dmaker.entity.Developer;
 import com.neuli.dmaker.repository.DeveloperRepository;
 import com.neuli.dmaker.type.DeveloperLevel;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class DMakerService {
      */
 
     @Transactional
-    public void createDeveloper() {
+    public void createDeveloper(CreateDeveloper.Request request) {
         Developer developer = Developer.builder()
                 .developerLevel(DeveloperLevel.Junior)
                 .developerSkillType(DeveloperSkillType.FRONT_END)

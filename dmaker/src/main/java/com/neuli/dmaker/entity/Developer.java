@@ -1,10 +1,10 @@
 package com.neuli.dmaker.entity;
 
+import com.neuli.dmaker.code.StatusCode;
 import com.neuli.dmaker.type.DeveloperLevel;
 import com.neuli.dmaker.type.DeveloperSkillType;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -45,6 +45,9 @@ public class Developer {
     private String name;
 
     private Integer age;
+
+    @Enumerated(EnumType.STRING)
+    private StatusCode statusCode;
 
     // row 가 생성되거나 없어질 때 자동으로 값 설정
     @CreatedDate

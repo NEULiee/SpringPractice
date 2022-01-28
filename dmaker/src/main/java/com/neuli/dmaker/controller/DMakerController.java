@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+/**
+ * @RestController
+ * RestController 라는 타입의 bean 으로 등록하겠다.
+ *
+ * @Controller + @ResponseBody
+ */
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor

@@ -36,16 +36,22 @@ public class DMakerService {
     */
 
     /**
-     * Transaction
-     * 데이터베이스의 상태를 변화시키기 해서 수행하는 작업의 단위
-     * 예를들어, 게시글을 작성하는 작업 -> 게시글 작성 insert, 게시글 불러오기 select 작업들을 하나의 트랜잭션으로 본다.
-     * <p>
-     * Transaction 의 특징
-     * [ACID]
-     * Atomic 원자성
-     * Consistency 일관성 : 항상 정해진 규칙에 의해서 DB 에 저장되어 있어야 한다.
-     * Isolation 고립성
-     * Durability 지속성 : commit 이 된 시점의 이력을 모두 남겨야한다.
+     *  Transaction
+     *  데이터베이스의 상태를 변화시키기 해서 수행하는 작업의 단위
+     *  예를들어, 게시글을 작성하는 작업 -> 게시글 작성 insert, 게시글 불러오기 select 작업들을 하나의 트랜잭션으로 본다.
+     *
+     *  *** Transaction 의 특징 [ACID] ***
+     *  1. Atomic 원자성 : A -> B, B -> A 의 일은 반드시 동시에 실행되어야 한다.
+     *  2. Consistency 일관성 : 항상 정해진 규칙에 의해서 DB 에 저장되어 있어야 한다.
+     *                       실행 중간에는 어긋나는 시점이 있더라고 끝난 후에는 무조건 어긋나는 경우가 없어야한다.
+     *  3. Isolation 고립성 : 성능과 trade-off 관계 (ex. serializable 을 많이 쓰면 성능이 낮아진다.)
+     *  4. Durability 지속성 : commit 이 된 시점의 모든 이력을 모두 남겨야한다.
+     *                       로그를 모두 저장이 되어야만 (commit 을 해야만) DB 에 저장이 되는 특징
+     *
+     *  @Transacitional [AOP]
+     *  business logic -> commit / rollback
+     *  만드는 로직은 정해져있고, 공통적으로 처리가 필요하기 때문에 AOP 를 기반으로 사용한다.
+     *
      */
 
     @Transactional
@@ -72,6 +78,7 @@ public class DMakerService {
         /* control + alt + v : 동일한 변수 뽑아내기 */
         validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
 
+        // JAVA 8 부터 ifPresent 사용 가능
         developerRepository.findByMemberId(request.getMemberId())
                 .ifPresent((developer -> {
                     throw new DMakerException(DUPLICATED_MEMBER_ID);

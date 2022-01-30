@@ -12,6 +12,10 @@ import javax.validation.constraints.Size;
 
 public class CreateDeveloper {
 
+    /**
+     *  취향의 차이.. static class 를 만들어서 사용한다.
+     */
+
     @Getter
     @Setter
     @AllArgsConstructor

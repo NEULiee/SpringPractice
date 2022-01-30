@@ -13,9 +13,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * @RestController
- * RestController 라는 타입의 bean 으로 등록하겠다.
- *
+ * @RestController RestController 라는 타입의 bean 으로 등록하겠다.
  * @Controller + @ResponseBody
  */
 
@@ -38,6 +36,9 @@ public class DMakerController {
         return dMakerService.getDeveloperDetail(memberId);
     }
 
+
+    // @Valid annotation 을 달아주어야 requestBody 에 담으면서 validation 이 동작한다.
+    // methodArgumentNotValidException 발생
     @PostMapping("/create-developer")
     public CreateDeveloper.Response createDevelopers(@Valid @RequestBody CreateDeveloper.Request request) {
         log.info("request : {}", request);

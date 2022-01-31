@@ -72,6 +72,15 @@ public class DMakerService {
         return CreateDeveloper.Response.fromEntity(developer);
     }
 
+    /**
+     *  validation 반환 타입이 void (boolean x) 인 이유
+     *
+     *  1. 로직의 복잡성이 증가한다.
+     *  2. 로직의 재활용성이 떨어진다. (validation 을 사용할 수 있는 곳이 한정적이게 된다.)
+     *  3. 유지보수가 힘들다.
+     *
+     *  ==> void 로 많이 쓰이는 추세
+    */
     private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
         // business validation
 
@@ -82,6 +91,7 @@ public class DMakerService {
         developerRepository.findByMemberId(request.getMemberId())
                 .ifPresent((developer -> {
                     throw new DMakerException(DUPLICATED_MEMBER_ID);
+                    // 예외를 처리해야한다.
                 }));
     }
 
@@ -106,8 +116,10 @@ public class DMakerService {
                 .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
     }
 
+    // @Transactional 없이 entity 의 값만 변경해주면 실제 DB 에 값이 변경되지 않는다.
     // 메서드를 들어가기 전에 트랜젝션을 시작했다가 값을 바꿔준 후
     // 전체 체킹을 하여 변경되는 부분이 커밋이 되도록 @Transactional
+    // ==> 따라서 한번의 DB 조작이 있더라도 넣어주는 것이 유리하다.
     @Transactional
     public DeveloperDetailDto editDeveloperDetail(String memberId, EditDeveloper.Request request) {
         validateEditDeveloperRequest(request, memberId);
@@ -147,6 +159,7 @@ public class DMakerService {
         developerRepository.deleteAll();
     }
 
+    // atomic
     @Transactional
     public DeveloperDetailDto deleteDeveloperByMemberId(String memberId) {
         // developerRepository.deleteByMemberId(memberId);
@@ -154,7 +167,7 @@ public class DMakerService {
         // 1. EMPLOYED -> RETIRED
         Developer developer = developerRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
-        developer.setStatusCode(StatusCode.RETIRED);
+        developer.setStatusCode(StatusCode.RETIRED);    // @Transactional 으로 인해 자동으로 commit
 
         // 2. save into RetiredDeveloper
         RetiredDeveloper retiredDeveloper = RetiredDeveloper.builder()

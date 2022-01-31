@@ -1,9 +1,7 @@
 package com.neuli.dmaker.controller;
 
-import com.neuli.dmaker.dto.CreateDeveloper;
-import com.neuli.dmaker.dto.DeveloperDetailDto;
-import com.neuli.dmaker.dto.DeveloperDto;
-import com.neuli.dmaker.dto.EditDeveloper;
+import com.neuli.dmaker.dto.*;
+import com.neuli.dmaker.exception.DMakerException;
 import com.neuli.dmaker.service.DMakerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,5 +69,24 @@ public class DMakerController {
     public DeveloperDetailDto deleteDeveloperByMemberId(@PathVariable String memberId) {
         log.info("DELETE /delete-developer/{memberId}");
         return dMakerService.deleteDeveloperByMemberId(memberId);
+    }
+
+    // 이 컨트롤러에서 발생하는 exception 을 처리할 수 있다.
+    // @ExceptionHandler(원하는 exception)
+    // 원하는 exception 이 발생하면 method 로 진입하게 된다.
+
+    // Exception 을 보낼 때 모든 코드가 handler 를 가지는 것은 좋지 않은 구조이기 때문에
+    // @ExceptionHandler 로 처리할 수 있다.
+    // global exception 으로 대체 가능하다.
+    @ResponseStatus(value = HttpStatus.CONFLICT) // 실무에서 잘 변경하지는 않는다. 적합하지 않는 경우가  ㄸ을 수 있어서
+    @ExceptionHandler(DMakerException.class)
+    public DMakerErrorResponse handleException(DMakerException e, HttpServletRequest request) {
+        log.error("errorCode: {}, url: {}, message: {}",
+                e.getDMakerErrorCode(), request.getRequestURI(), e.getDetailMessage());
+
+        return DMakerErrorResponse.builder()
+                .errorCode(e.getDMakerErrorCode())
+                .errorMessage(e.getDetailMessage())
+                .build();
     }
 }

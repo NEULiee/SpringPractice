@@ -7,8 +7,10 @@ import com.neuli.dmaker.dto.EditDeveloper;
 import com.neuli.dmaker.service.DMakerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -24,6 +26,11 @@ public class DMakerController {
 
     private final DMakerService dMakerService;
 
+    /**
+     *  정보를 Entity 로 응답을 내려주는 방식은 좋지않은 패턴이다.
+     *  1. 불필요한 정보를 내려줄 수 도 있다.
+     *  2. transaction 이 제대로 없는 정보를 접근히먄 안된다.
+     */
     @GetMapping("/developers")
     public List<DeveloperDto> getAllEmployedDevelopers() {
         log.info("GET /developers HTTP/1.1");

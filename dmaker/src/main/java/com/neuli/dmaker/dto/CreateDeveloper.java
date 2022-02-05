@@ -55,7 +55,7 @@ public class CreateDeveloper {
         private String memberId;
 
         // Developer -> CreateDeveloper.Response
-        public static Response fromEntity(Developer developer) {
+        public static Response fromEntity(@NonNull Developer developer) {
             return Response.builder()
                     .developerLevel(developer.getDeveloperLevel())
                     .developerSkillType(developer.getDeveloperSkillType())

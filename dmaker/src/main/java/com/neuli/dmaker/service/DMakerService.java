@@ -11,13 +11,15 @@ import com.neuli.dmaker.exception.DMakerException;
 import com.neuli.dmaker.repository.DeveloperRepository;
 import com.neuli.dmaker.repository.RetiredDeveloperRepository;
 import com.neuli.dmaker.type.DeveloperLevel;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.neuli.dmaker.constant.DMakerConstant.MIN_SENIOR_EXPERIENCE_YEARS;
 import static com.neuli.dmaker.exception.DMakerErrorCode.*;
 
 @Service
@@ -54,11 +56,9 @@ public class DMakerService {
      *
      */
 
-    @Transactional
-    public CreateDeveloper.Response createDeveloper(CreateDeveloper.Request request) {
-        validateCreateDeveloperRequest(request);
-
-        Developer developer = Developer.builder()
+    private Developer createDeveloperFromRequest(CreateDeveloper.Request request) {
+        // builder logic: 따로 함수로 리팩토링
+        return Developer.builder()
                 .developerLevel(request.getDeveloperLevel())
                 .developerSkillType(request.getDeveloperSkillType())
                 .experienceYears(request.getExperienceYears())
@@ -67,9 +67,17 @@ public class DMakerService {
                 .name(request.getName())
                 .age(request.getAge())
                 .build();
+    }
 
-        developerRepository.save(developer);
-        return CreateDeveloper.Response.fromEntity(developer);
+    @Transactional
+    public CreateDeveloper.Response createDeveloper(CreateDeveloper.Request request) {
+        validateCreateDeveloperRequest(request);
+
+        // builder 로직이 길어져서 리팩토링
+
+        return CreateDeveloper.Response.fromEntity(
+                developerRepository.save(
+                        createDeveloperFromRequest(request)));
     }
 
     /**
@@ -81,11 +89,16 @@ public class DMakerService {
      *
      *  ==> void 로 많이 쓰이는 추세
     */
-    private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
+    private void validateCreateDeveloperRequest(@NonNull CreateDeveloper.Request request) {
+        /**
+         *  NonNull : 정적 분석 / null 이 들어오면 NullPointerException 을 발생시킨다.
+         *  NotNull : 런타임 분석 / null 만 허용하지 않는다. "", " "은 허용
+         */
+
         // business validation
 
-        /* control + alt + v : 동일한 변수 뽑아내기 */
-        validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
+        // 리팩토링
+        request.getDeveloperLevel().validateExperienceYears(request.getExperienceYears());
 
         // JAVA 8 부터 ifPresent 사용 가능
         developerRepository.findByMemberId(request.getMemberId())
@@ -95,6 +108,7 @@ public class DMakerService {
                 }));
     }
 
+    @Transactional(readOnly = true)
     public List<DeveloperDto> getAllEmployedDevelopers() {
         /**
          *  collect()
@@ -110,10 +124,14 @@ public class DMakerService {
                 .collect(Collectors.toList());
     }
 
-    public DeveloperDetailDto getDeveloperDetail(String memberId) {
+    private Developer getDeveloperByMemberId(String memberId) {
         return developerRepository.findByMemberId(memberId)
-                .map(DeveloperDetailDto::fromEntity)
                 .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
+    }
+
+    @Transactional(readOnly = true)
+    public DeveloperDetailDto getDeveloperDetail(String memberId) {
+        return DeveloperDetailDto.fromEntity(getDeveloperByMemberId(memberId));
     }
 
     // @Transactional 없이 entity 의 값만 변경해주면 실제 DB 에 값이 변경되지 않는다.
@@ -122,37 +140,19 @@ public class DMakerService {
     // ==> 따라서 한번의 DB 조작이 있더라도 넣어주는 것이 유리하다.
     @Transactional
     public DeveloperDetailDto editDeveloperDetail(String memberId, EditDeveloper.Request request) {
-        validateEditDeveloperRequest(request, memberId);
+        request.getDeveloperLevel().validateExperienceYears(request.getExperienceYears());
 
-        Developer developer = developerRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
+        return DeveloperDetailDto.fromEntity(
+                getUpdatedDeveloperFromRequest(request, getDeveloperByMemberId(memberId)));
+    }
 
+    // 상세적인 부분은 private, 큰 기능은 public
+    private Developer getUpdatedDeveloperFromRequest(EditDeveloper.Request request, Developer developer) {
         developer.setDeveloperLevel(request.getDeveloperLevel());
         developer.setDeveloperSkillType(request.getDeveloperSkillType());
         developer.setExperienceYears(request.getExperienceYears());
 
-        return DeveloperDetailDto.fromEntity(developer);
-    }
-
-    private void validateEditDeveloperRequest(EditDeveloper.Request request, String memberId) {
-        // business validation
-
-        /* control + alt + v : 동일한 변수 뽑아내기 */
-        validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
-    }
-
-    private void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
-        if (developerLevel == DeveloperLevel.SENIOR
-                && experienceYears < 10) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-        if (developerLevel == DeveloperLevel.JUNGNIOR
-                && (experienceYears < 4 || experienceYears > 10)) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-        if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
+        return developer;
     }
 
     public void deleteAllDevelopers() {

@@ -13,8 +13,9 @@ import java.util.List;
  * -----------------------------------------------------------
  * 2022/02/09       neuli         최초 생성
  */
-public class BubbleSort <T extends Comparable<T>> {
+public class BubbleSort <T extends Comparable<T>> implements Sort<T> {
 
+    @Override
     public List<T> sort(List<T> list) {
         List<T> output = new ArrayList<>(list);
 
